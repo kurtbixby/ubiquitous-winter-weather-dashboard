@@ -1,2 +1,2 @@
-# ubiquitous-winter-weather-forecast
+# ubiquitous-winter-weather-dashboard
 Weather Dashboard Application
