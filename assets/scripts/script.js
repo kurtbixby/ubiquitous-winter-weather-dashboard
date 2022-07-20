@@ -12,7 +12,15 @@ const SEARCH_FIELD_ID = 'search-field';
 const CURRENT_WEATHER_DIV_ID = 'current-weather';
 const FORECAST_DIV_ID = 'forecast-holder';
 
+const RECENT_SEARCH_CLASS = 'recent-city';
+const RECENT_SEARCHES_DIV_ID = 'past-cities';
+const CITY_STORAGE_KEY = 'recent-city-searches';
+const RECENT_SEARCHES_NUMBER = 5;
+let recentSearches = [];
+
 function init() {
+    recentSearches = loadCitySearches();
+    createRecentSearchesSection(recentSearches);
     document.getElementById(SEARCH_BUTTON_ID).addEventListener('click', searchButtonHandler);
 }
 
@@ -24,10 +32,23 @@ function searchButtonHandler(event) {
         return;
     }
 
-    // Check 'cache' for city coordinates
+    searchForCity(inputText);
+}
 
+function recentSearchHandler(event) {
+    let cityName = $(event.target).text();
+
+    $('#' + SEARCH_FIELD_ID).val(cityName);
+
+    searchForCity(cityName, true);
+}
+
+function searchForCity(inputText, isRecent = false) {
     getCityCoordinates(inputText)
     .then((cityData) => {
+        if (!isRecent) {
+            addRecentCitySearch(cityData.name);
+        }
         return getWeatherData(cityData);
     })
     .then((weatherData) => {
@@ -83,8 +104,10 @@ function processCombinedWeatherData(combinedData) {
         icon: iconName,
     };
 
+    // Clear current weather first
     buildCurrentWeather(currentWeather);
 
+    // Clear forecast first
     let forecast = weatherData.daily.slice(1, 6);
     buildForecast(forecast);
 }
@@ -92,8 +115,7 @@ function processCombinedWeatherData(combinedData) {
 function buildCurrentWeather(currentWeather) {
     let weatherElement = createCurrentWeatherElement();
     populateCurrentWeatherElement(weatherElement, currentWeather);
-
-    $('#' + CURRENT_WEATHER_DIV_ID).append(weatherElement);
+    $('#' + CURRENT_WEATHER_DIV_ID).html(weatherElement);
 }
 
 function createCurrentWeatherElement() {
@@ -124,6 +146,7 @@ function createCurrentWeatherTitle(weatherData) {
 }
 
 function buildForecast(forecastData) {
+    $('#' + FORECAST_DIV_ID).html('');
     forecastData.forEach(dayForecast => {
         let dayElement = createDayForecastElement();
         let processedDay = {
@@ -169,23 +192,23 @@ function kelvinToFahrenheit(kTemp) {
     return fTemp;
 }
 
-function oneApiHandler(event) {
-    console.debug('One Api Handler');
+// function oneApiHandler(event) {
+//     console.debug('One Api Handler');
 
-    let cityData = { appid: API_KEY, lat: 30.2711286, lon: -97.7436995, units: 'imperial'};
-    let requestUrl = buildRequestUrl(oneApiBase, cityData);
+//     let cityData = { appid: API_KEY, lat: 30.2711286, lon: -97.7436995, units: 'imperial'};
+//     let requestUrl = buildRequestUrl(oneApiBase, cityData);
     
-    handleRequest(requestUrl).
-    then(data => {
-        console.log(data);
-    })
-    // fetch(requestUrl).then(response => {
-    //     console.log(response);
-    //     return response.json();
-    // }).then(data => {
-    //     console.log(data);
-    // })
-}
+//     handleRequest(requestUrl).
+//     then(data => {
+//         console.log(data);
+//     })
+//     // fetch(requestUrl).then(response => {
+//     //     console.log(response);
+//     //     return response.json();
+//     // }).then(data => {
+//     //     console.log(data);
+//     // })
+// }
 
 function handleRequest(requestUrl) {
     return fetch(requestUrl).then(response => {
@@ -262,6 +285,41 @@ function buildRequestUrl(baseUrl, queryParams) {
     }
 
     return finalUrl;
+}
+
+function addRecentCitySearch(cityData) {
+    recentSearches.unshift(cityData);
+    if (recentSearches.length > RECENT_SEARCHES_NUMBER) {
+        recentSearches = recentSearches.slice(0, RECENT_SEARCHES_NUMBER);
+    }
+    saveCitySearches(recentSearches);
+    let holder = $('#'+RECENT_SEARCHES_DIV_ID);
+    holder.prepend(buildRecentCityElement(cityData));
+    while (holder.children().length > RECENT_SEARCHES_NUMBER) {
+        holder.children(':last-child').remove();
+    }
+}
+
+function createRecentSearchesSection(recentCities) {
+    recentCities.forEach(city => $('#'+RECENT_SEARCHES_DIV_ID).append(buildRecentCityElement(city)));
+}
+
+function buildRecentCityElement(cityName) {
+    let element = $('<div>').text(cityName).addClass('recent-city').on('click', recentSearchHandler);
+    return element;
+}
+
+function saveCitySearches(citySearches) {
+    localStorage.setItem(CITY_STORAGE_KEY, JSON.stringify(citySearches));
+}
+
+function loadCitySearches() {
+    let retrievedValue = localStorage.getItem(CITY_STORAGE_KEY);
+    if (retrievedValue == null) {
+        return [];
+    } else {
+        return JSON.parse(retrievedValue);
+    }
 }
 
 init();
