@@ -1,12 +1,16 @@
+// Weather API Key
 const API_KEY = '3dc950d6ef571454d5a850ac774d8a03'
 
+// Base URLs for the Geocode and the Weather data APIs
 const oneApiBase = 'https://api.openweathermap.org/data/2.5/onecall'; // ?lat={lat}&lon={lon}&exclude={part}&appid={API key}
 const geoApiBase = 'http://api.openweathermap.org/geo/1.0/direct'; // ?q={city name},{state code},{country code}&limit={limit}&appid={API key}
 
+// Base URL for the weather icons
 const WEATHER_ICON_BASE = 'http://openweathermap.org/img/wn/';
 
 const UNIT_TYPE = 'imperial';
 
+// Misc IDs of elements on the page
 const SEARCH_BUTTON_ID = 'search-button';
 const SEARCH_FIELD_ID = 'search-field';
 const CURRENT_WEATHER_DIV_ID = 'current-weather';
@@ -20,12 +24,15 @@ const CITY_STORAGE_KEY = 'recent-city-searches';
 const RECENT_SEARCHES_NUMBER = 10;
 let recentSearches = [];
 
+// Load the searched cities and add an event handler to the search button
 function init() {
     recentSearches = loadCitySearches();
-    createRecentSearchesSection(recentSearches);
+    buildRecentSearchesSection(recentSearches);
     document.getElementById(SEARCH_BUTTON_ID).addEventListener('click', searchButtonHandler);
 }
 
+// Handler the search button click
+// Grabs and sanitizes input
 function searchButtonHandler(event) {
     event.preventDefault();
 
@@ -37,6 +44,8 @@ function searchButtonHandler(event) {
     searchForCity(inputText);
 }
 
+// Handler for the recent city buttons
+// Sets the search field to the searched city
 function recentSearchHandler(event) {
     let cityName = $(event.target).text();
 
@@ -45,6 +54,8 @@ function recentSearchHandler(event) {
     searchForCity(cityName, true);
 }
 
+// The actual search function
+// Shows the Weather Area
 function searchForCity(inputText, isRecent = false) {
     $('#'+WEATHER_ID).show();
     getCityCoordinates(inputText)
@@ -65,6 +76,7 @@ function getCityCoordinates(cityName) {
     return requestCityCoordinates(cityName);
 }
 
+// The actual request for city lat/long
 function requestCityCoordinates(cityName) {
     let geoCodeParams = {appid: API_KEY, q: cityName};
     let requestUrl = buildRequestUrl(geoApiBase, geoCodeParams);
@@ -80,6 +92,7 @@ function getWeatherData(cityData) {
     return requesetWeatherData(cityData);
 }
 
+// The actual request for weather data
 function requesetWeatherData(cityData) {
     let weatherParams = {appid: API_KEY, lat: cityData.lat, lon: cityData.lon, units: UNIT_TYPE};
     let requestUrl = buildRequestUrl(oneApiBase, weatherParams);
@@ -90,6 +103,7 @@ function requesetWeatherData(cityData) {
     })
 }
 
+// Build the weather area for a given city with data
 function processCombinedWeatherData(combinedData) {
     let weatherData = combinedData.weather;
     let temp = weatherData.current.temp;
@@ -107,20 +121,18 @@ function processCombinedWeatherData(combinedData) {
         icon: iconName,
     };
 
-    // Clear current weather first
     buildCurrentWeather(currentWeather);
-
-    // Clear forecast first
-    let forecast = weatherData.daily.slice(1, 6);
-    buildForecast(forecast);
+    buildForecast(weatherData.daily.slice(1, 6));
 }
 
+// Create + populate current weather
 function buildCurrentWeather(currentWeather) {
     let weatherElement = createCurrentWeatherElement();
     populateCurrentWeatherElement(weatherElement, currentWeather);
     $('#' + CURRENT_WEATHER_DIV_ID).html(weatherElement);
 }
 
+// Create the empty element
 function createCurrentWeatherElement() {
     let holdingElement = $('<div>');
     holdingElement.append($('<h2>'));
@@ -132,6 +144,7 @@ function createCurrentWeatherElement() {
     return holdingElement;
 }
 
+// Create the empty element
 function populateCurrentWeatherElement(weatherElement, weatherData) {
     let title = createCurrentWeatherTitle(weatherData);
     let weatherIcon = createWeatherIcon(weatherData.icon);
@@ -144,10 +157,10 @@ function populateCurrentWeatherElement(weatherElement, weatherData) {
 }
 
 function createCurrentWeatherTitle(weatherData) {
-    // Add date to the end
     return weatherData.city;
 }
 
+// Create + populate the forecast
 function buildForecast(forecastData) {
     $('#'+FORECAST_DIV_ID).show();
     $('#' + FORECAST_HOLDER_ID).html('');
@@ -165,6 +178,7 @@ function buildForecast(forecastData) {
     })
 }
 
+// Create an empty day forecast element
 function createDayForecastElement() {
     let holdingElement = $('<div>').addClass('card');
     let bodyElement = $('<div>').addClass('card-body flex-column align-items-center bg-info rounded');
@@ -183,6 +197,7 @@ function createDayForecastElement() {
     return holdingElement;
 }
 
+// Populate an empty day forecast element
 function populateDayForecastElement(forecastElement, weatherData) {
     console.log(weatherData);
     let dateString = moment(weatherData.dt, 'X').format('MM/DD/YYYY');
@@ -194,30 +209,15 @@ function populateDayForecastElement(forecastElement, weatherData) {
     $(subElements[2]).text('Humidity: ' + weatherData.humidity + '%');
 }
 
+// Unneeded function
+// Converts degrees K to degrees F
 function kelvinToFahrenheit(kTemp) {
     let cTemp = kTemp - 273.15;
     let fTemp = ((9 * cTemp) / 5) + 32;
     return fTemp;
 }
 
-// function oneApiHandler(event) {
-//     console.debug('One Api Handler');
-
-//     let cityData = { appid: API_KEY, lat: 30.2711286, lon: -97.7436995, units: 'imperial'};
-//     let requestUrl = buildRequestUrl(oneApiBase, cityData);
-    
-//     handleRequest(requestUrl).
-//     then(data => {
-//         console.log(data);
-//     })
-//     // fetch(requestUrl).then(response => {
-//     //     console.log(response);
-//     //     return response.json();
-//     // }).then(data => {
-//     //     console.log(data);
-//     // })
-// }
-
+// Wrapper for fetch requests
 function handleRequest(requestUrl) {
     return fetch(requestUrl).then(response => {
         console.log(response);
@@ -225,6 +225,7 @@ function handleRequest(requestUrl) {
     })
 }
 
+// Selects specific data from the geocode API
 function processGeoCodeResponse(responseData) {
     let cityData = responseData[0];
     let selectedData = {
@@ -244,6 +245,8 @@ function createWeatherIcon(iconName) {
     return $('<img>').attr('src', getWeatherIcon(iconName));
 }
 
+// Creates the weather icon url
+// Acts as a whitelist
 function getWeatherIcon(iconName) {
     // Giant switch to act as a whitelist of sorts for the icons
     switch(iconName) {
@@ -277,6 +280,7 @@ function getWeatherIcon(iconName) {
     }
 }
 
+// Builds a request URL from a base URL + query object
 function buildRequestUrl(baseUrl, queryParams) {
     if (Object.keys(queryParams).length < 1) {
         return baseUrl;
@@ -295,6 +299,10 @@ function buildRequestUrl(baseUrl, queryParams) {
     return finalUrl;
 }
 
+// Adds a recent city to the recent searches
+// Adds to the data structure
+// Saves the data structure
+// Inserts the city into recent searches
 function addRecentCitySearch(cityData) {
     recentSearches.unshift(cityData);
     if (recentSearches.length > RECENT_SEARCHES_NUMBER) {
@@ -308,10 +316,12 @@ function addRecentCitySearch(cityData) {
     }
 }
 
-function createRecentSearchesSection(recentCities) {
+// Builds the recent cities section from an array of city names
+function buildRecentSearchesSection(recentCities) {
     recentCities.forEach(city => $('#'+RECENT_SEARCHES_DIV_ID).append(buildRecentCityElement(city)));
 }
 
+// Builds a specifc recent city element with a name
 function buildRecentCityElement(cityName) {
     let element = $('<button>').text(cityName).addClass('btn btn-secondary btn-lg btn-block').on('click', recentSearchHandler);
     return element;
