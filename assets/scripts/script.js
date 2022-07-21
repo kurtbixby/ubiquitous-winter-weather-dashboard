@@ -10,12 +10,14 @@ const UNIT_TYPE = 'imperial';
 const SEARCH_BUTTON_ID = 'search-button';
 const SEARCH_FIELD_ID = 'search-field';
 const CURRENT_WEATHER_DIV_ID = 'current-weather';
-const FORECAST_DIV_ID = 'forecast-holder';
+const FORECAST_DIV_ID = 'future-weather'
+const FORECAST_HOLDER_ID = 'forecast-holder';
+const WEATHER_ID = 'weather-area';
 
 const RECENT_SEARCH_CLASS = 'recent-city';
 const RECENT_SEARCHES_DIV_ID = 'past-cities';
 const CITY_STORAGE_KEY = 'recent-city-searches';
-const RECENT_SEARCHES_NUMBER = 5;
+const RECENT_SEARCHES_NUMBER = 10;
 let recentSearches = [];
 
 function init() {
@@ -44,6 +46,7 @@ function recentSearchHandler(event) {
 }
 
 function searchForCity(inputText, isRecent = false) {
+    $('#'+WEATHER_ID).show();
     getCityCoordinates(inputText)
     .then((cityData) => {
         if (!isRecent) {
@@ -134,10 +137,10 @@ function populateCurrentWeatherElement(weatherElement, weatherData) {
     let weatherIcon = createWeatherIcon(weatherData.icon);
     weatherElement.children('h2').text(title).append(weatherIcon);
     let subElements = weatherElement.children('p');
-    $(subElements[0]).text(weatherData.temp + ' F');
-    $(subElements[1]).text(weatherData.wind + ' MPH');
-    $(subElements[2]).text(weatherData.humidity + '%');
-    $(subElements[3]).text(weatherData.uvi);
+    $(subElements[0]).text('Temp: ' + weatherData.temp + ' F');
+    $(subElements[1]).text('Wind Spd: ' + weatherData.wind + ' MPH');
+    $(subElements[2]).text('Humidity: ' + weatherData.humidity + '%');
+    $(subElements[3]).text('UV Index: ' + weatherData.uvi);
 }
 
 function createCurrentWeatherTitle(weatherData) {
@@ -146,7 +149,8 @@ function createCurrentWeatherTitle(weatherData) {
 }
 
 function buildForecast(forecastData) {
-    $('#' + FORECAST_DIV_ID).html('');
+    $('#'+FORECAST_DIV_ID).show();
+    $('#' + FORECAST_HOLDER_ID).html('');
     forecastData.forEach(dayForecast => {
         let dayElement = createDayForecastElement();
         let processedDay = {
@@ -156,23 +160,27 @@ function buildForecast(forecastData) {
             humidity: dayForecast.humidity,
             icon: dayForecast.weather[0].icon,
         };
-        populateDayForecastElement(dayElement, processedDay);
-        $('#' + FORECAST_DIV_ID).append(dayElement);
+        populateDayForecastElement(dayElement.children('.card-body'), processedDay);
+        $('#' + FORECAST_HOLDER_ID).append(dayElement);
     })
 }
 
 function createDayForecastElement() {
-    let holdingElement = $('<div>');
-    let dateElement = $('<h3>');
-    let iconElement = $('<img>');
-    let tempElement = $('<p>');
-    let windElement = $('<p>');
-    let humidityElement = $('<p>');
+    let holdingElement = $('<div>').addClass('card');
+    let bodyElement = $('<div>').addClass('card-body flex-column align-items-center bg-info rounded');
+    holdingElement.append(bodyElement);
 
-    return holdingElement.append(
+    let dateElement = $('<h3>').addClass('text-center');
+    let iconElement = $('<img>').addClass('mx-auto d-block');
+    let tempElement = $('<p>').addClass('text-center');
+    let windElement = $('<p>').addClass('text-center');
+    let humidityElement = $('<p>').addClass('text-center');
+    bodyElement.append(
         dateElement, iconElement,
         tempElement, windElement, humidityElement
     );
+    
+    return holdingElement;
 }
 
 function populateDayForecastElement(forecastElement, weatherData) {
@@ -181,9 +189,9 @@ function populateDayForecastElement(forecastElement, weatherData) {
     forecastElement.children('h3').text(dateString);
     forecastElement.children('img').attr('src', getWeatherIcon(weatherData.icon));
     let subElements = forecastElement.children('p');
-    $(subElements[0]).text(weatherData.temp + ' F');
-    $(subElements[1]).text(weatherData.wind + ' MPH');
-    $(subElements[2]).text(weatherData.humidity + '%');
+    $(subElements[0]).text('Temp: ' + weatherData.temp + ' F');
+    $(subElements[1]).text('Wind Spd: ' + weatherData.wind + ' MPH');
+    $(subElements[2]).text('Humidity: ' + weatherData.humidity + '%');
 }
 
 function kelvinToFahrenheit(kTemp) {
@@ -305,7 +313,7 @@ function createRecentSearchesSection(recentCities) {
 }
 
 function buildRecentCityElement(cityName) {
-    let element = $('<div>').text(cityName).addClass('recent-city').on('click', recentSearchHandler);
+    let element = $('<button>').text(cityName).addClass('btn btn-secondary btn-lg btn-block').on('click', recentSearchHandler);
     return element;
 }
 

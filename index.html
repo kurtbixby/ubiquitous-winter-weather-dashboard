@@ -11,23 +11,39 @@
         <link rel="stylesheet" href="./assets/styles/style.css" />
     </head>
     <body>
+        <div class="jumbotron jumbotron-fluid py-1 bg-info">
+            <div class="container">
+              <h1 class="display-4 text-center">Ubiquitous Winter</h1>
+              <p class="lead text-center">Weather Dashboard</p>
+            </div>
+        </div>
         <div class="container-fluid">
             <div class="row">
-                <section class="col-3">
-                    <div>
-                        <h2>Search for a City: </h2>
-                        <form>
-                            <input type="text" id="search-field" placeholder="Enter a city name">
-                            <button id="search-button" type="submit">Search</button>
-                        </form>
+                <section class="col-12 col-md-4 col-lg-3">
+                    <div class="my-1 p-2 bg-info rounded">
+                        <div>
+                            <h3 class="text-center">Search for a City</h3>
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" id="search-field" placeholder="Enter a city name">
+                                <div class="input-group-append">
+                                    <button class="btn btn-secondary" id="search-button" type="submit">Search</button>
+                                </div>
+                            </div>
+                            <!-- <form>
+                                <input type="text" id="search-field" placeholder="Enter a city name">
+                                <button id="search-button" type="submit">Search</button>
+                            </form> -->
+                        </div>
+                        <div class="" id="past-cities"></div>
                     </div>
-                    <div id="past-cities"></div>
                 </section>
-                <section class="col-9">
-                    <div id="current-weather"></div>
-                    <div id="future-weather">
-                        <h3>5-Day Forecast:</h3>
-                        <div id="forecast-holder" class="row"></div>
+                <section id="weather-area" class="col-12 col-md-8 col-lg-9">
+                    <div class="my-1 rounded">
+                        <div id="current-weather" class="mb-2 p-2 bg-info rounded"></div>
+                        <div id="future-weather" class="mt-2 p-2">
+                            <h3 class="text-center">5-Day Forecast</h3>
+                            <div id="forecast-holder" class="row justify-content-around"></div>
+                        </div>
                     </div>
                 </section>
             </div>
