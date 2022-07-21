@@ -3,7 +3,7 @@ const API_KEY = '3dc950d6ef571454d5a850ac774d8a03'
 
 // Base URLs for the Geocode and the Weather data APIs
 const oneApiBase = 'https://api.openweathermap.org/data/2.5/onecall'; // ?lat={lat}&lon={lon}&exclude={part}&appid={API key}
-const geoApiBase = 'http://api.openweathermap.org/geo/1.0/direct'; // ?q={city name},{state code},{country code}&limit={limit}&appid={API key}
+const geoApiBase = 'https://api.openweathermap.org/geo/1.0/direct'; // ?q={city name},{state code},{country code}&limit={limit}&appid={API key}
 
 // Base URL for the weather icons
 const WEATHER_ICON_BASE = 'http://openweathermap.org/img/wn/';
