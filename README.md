@@ -11,7 +11,7 @@ To use, simply enter a city name and click search to have the weather data show 
 
 Demo
 =====
-Here's a live deployed version of the scheduler: [https://kurtbixby.github.io/ubiquitous-winter-weather-dashboard/](https://kurtbixby.github.io/ubiquitous-winter-weather-dashboard/).
+Here's a live deployed version of the weather dashboard: [https://kurtbixby.github.io/ubiquitous-winter-weather-dashboard/](https://kurtbixby.github.io/ubiquitous-winter-weather-dashboard/).
 
 Credits
 =====
